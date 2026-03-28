@@ -1,0 +1,508 @@
+/* ============================================
+   VERAMI.STUDIO — components.css
+   Przyciski, karty, filtry, formularz,
+   lightbox, grid portfolio
+   ============================================ */
+
+/* ================================================
+   PRZYCISKI
+   ================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  padding: 0.875rem 2rem;
+  border-radius: 0;                    /* ostry, architektoniczny */
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-mid) var(--ease-out),
+    color var(--dur-mid) var(--ease-out),
+    border-color var(--dur-mid) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-mid) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ripple efekt przy kliknieciu */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--dur-fast);
+}
+
+.btn:active::before {
+  opacity: 0.06;
+}
+
+/* Ciemny — wypelniony */
+.btn--primary {
+  background: var(--color-dark);
+  color: var(--color-light);
+  border: 1px solid var(--color-dark);
+}
+
+.btn--primary:hover {
+  background: transparent;
+  color: var(--color-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(82, 58, 52, 0.2);
+}
+
+/* Konturowy */
+.btn--outline {
+  background: transparent;
+  color: var(--color-dark);
+  border: 1px solid var(--color-dark);
+}
+
+.btn--outline:hover {
+  background: var(--color-dark);
+  color: var(--color-light);
+  transform: translateY(-1px);
+}
+
+/* Jasny — na ciemnym tle */
+.btn--light {
+  background: var(--color-light);
+  color: var(--color-dark);
+  border: 1px solid var(--color-light);
+}
+
+.btn--light:hover {
+  background: transparent;
+  color: var(--color-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(241, 242, 237, 0.15);
+}
+
+/* Ghostowy — sam tekst ze strzalka */
+.btn--ghost {
+  background: transparent;
+  border: none;
+  color: var(--color-dark);
+  padding-inline: 0;
+  letter-spacing: var(--tracking-wide);
+  gap: var(--space-3);
+}
+
+.btn--ghost::after {
+  content: '\2192';           /* → */
+  display: inline-block;
+  transition: transform var(--dur-mid) var(--ease-spring);
+}
+
+.btn--ghost:hover::after {
+  transform: translateX(6px);
+}
+
+/* Maly */
+.btn--sm {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.65rem;
+}
+
+/* ================================================
+   KARTY PORTFOLIO
+   ================================================ */
+
+/* Grid na stronie portfolio.html */
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+/* Grid podgladu na index.html */
+.portfolio-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+/* Karta projektu */
+.project-card {
+  display: block;
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-dark-06);
+  cursor: pointer;
+  /* Subtelny cien na hover */
+  transition:
+    box-shadow var(--dur-mid) var(--ease-out),
+    transform var(--dur-mid) var(--ease-out);
+}
+
+.project-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
+}
+
+/* Kontener obrazu — zachowuje proporcje */
+.project-card__image-wrap {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;    /* pionowe karty — bardzo eleganckie */
+}
+
+.project-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
+  will-change: transform;
+}
+
+/* Zoom obrazu przy hover */
+.project-card:hover .project-card__image {
+  transform: scale(1.06);
+}
+
+/* Overlay — pojawia sie przy hover */
+.project-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(82, 58, 52, 0.90) 0%,
+    rgba(82, 58, 52, 0.35) 40%,
+    transparent 70%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--space-6);
+  gap: var(--space-2);
+  opacity: 0;
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+
+.project-card:hover .project-card__overlay {
+  opacity: 1;
+}
+
+/* Tytul i meta w overlay */
+.project-card__title {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: 300;
+  color: var(--color-light);
+  line-height: var(--leading-snug);
+  transform: translateY(10px);
+  transition: transform var(--dur-mid) var(--ease-out);
+}
+
+.project-card__meta {
+  font-size: var(--text-xs);
+  font-weight: 400;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: rgba(241, 242, 237, 0.65);
+  transform: translateY(10px);
+  transition: transform var(--dur-mid) var(--ease-out) 0.04s;
+}
+
+.project-card:hover .project-card__title,
+.project-card:hover .project-card__meta {
+  transform: translateY(0);
+}
+
+/* Info pod obrazem */
+.project-card__info {
+  padding: var(--space-4) var(--space-2) var(--space-3);
+}
+
+.project-card__info-title {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 400;
+  color: var(--color-dark);
+}
+
+.project-card__info-meta {
+  font-size: var(--text-xs);
+  color: var(--color-dark-40);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+}
+
+/* ================================================
+   FILTRY PORTFOLIO
+   ================================================ */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-12);
+}
+
+.filter-btn {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--color-dark-40);
+  border-radius: 100px;          /* pill */
+  background: transparent;
+  color: var(--color-dark-80);
+  cursor: pointer;
+  transition:
+    background var(--dur-mid) var(--ease-out),
+    color var(--dur-mid) var(--ease-out),
+    border-color var(--dur-mid) var(--ease-out);
+}
+
+.filter-btn:hover {
+  border-color: var(--color-dark);
+  color: var(--color-dark);
+}
+
+.filter-btn.is-active {
+  background: var(--color-dark);
+  color: var(--color-light);
+  border-color: var(--color-dark);
+}
+
+/* Pusty stan gridu */
+.portfolio-empty {
+  grid-column: 1 / -1;
+  padding: var(--space-20);
+  text-align: center;
+  font-size: var(--text-lg);
+  font-weight: 300;
+  color: var(--color-dark-40);
+}
+
+/* ================================================
+   FORMULARZ KONTAKTOWY
+   ================================================ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form__label {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-dark-80);
+}
+
+.form__input,
+.form__textarea {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 300;
+  color: var(--color-dark);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-dark-40);
+  padding: var(--space-3) 0;
+  width: 100%;
+  border-radius: 0;
+  transition: border-color var(--dur-mid) var(--ease-out);
+}
+
+.form__input::placeholder,
+.form__textarea::placeholder {
+  color: var(--color-dark-40);
+  font-weight: 300;
+}
+
+.form__input:focus,
+.form__textarea:focus {
+  border-bottom-color: var(--color-dark);
+  outline: none;
+}
+
+.form__input.is-invalid,
+.form__textarea.is-invalid {
+  border-bottom-color: #b03020;
+}
+
+.form__status.is-loading {
+  display: block;
+  color: var(--color-dark-60);
+  font-style: italic;
+}
+
+.form__textarea {
+  resize: none;
+  min-height: 130px;
+  line-height: var(--leading-loose);
+}
+
+.form__status {
+  font-size: var(--text-sm);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  display: none;
+  margin-bottom: var(--space-4);
+}
+
+.form__status.is-success {
+  display: block;
+  background: rgba(82, 58, 52, 0.07);
+  color: var(--color-dark);
+}
+
+.form__status.is-error {
+  display: block;
+  background: rgba(180, 60, 50, 0.07);
+  color: #a02020;
+}
+
+/* ================================================
+   LIGHTBOX
+   ================================================ */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(10, 7, 6, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-mid) var(--ease-out);
+}
+
+.lightbox.is-open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lightbox__img {
+  max-width: 88vw;
+  max-height: 86vh;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  display: block;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: var(--space-6);
+  right: var(--space-6);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: rgba(241, 242, 237, 0.6);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--dur-fast);
+}
+
+.lightbox__close:hover {
+  color: var(--color-light);
+}
+
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(241, 242, 237, 0.5);
+  font-size: 2.5rem;
+  font-weight: 200;
+  cursor: pointer;
+  padding: var(--space-4);
+  line-height: 1;
+  transition: color var(--dur-fast);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.lightbox__nav:hover {
+  color: var(--color-light);
+}
+
+.lightbox__nav--prev {
+  left: var(--space-4);
+}
+
+.lightbox__nav--next {
+  right: var(--space-4);
+}
+
+.lightbox__counter {
+  position: absolute;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: rgba(241, 242, 237, 0.4);
+}
+
+/* ================================================
+   SKELETON LOADER (portfolio.html)
+   ================================================ */
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+.skeleton {
+  background: var(--color-dark-06);
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Karta skeleton */
+.project-card[aria-hidden="true"] .project-card__image-wrap {
+  aspect-ratio: 4 / 5;
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+
+/* ================================================
+   BADGE / TAG
+   ================================================ */
+
+.badge {
+  display: inline-block;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  background: var(--color-dark-06);
+  color: var(--color-dark-80);
+  border-radius: 100px;
+}

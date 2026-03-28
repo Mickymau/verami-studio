@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tytul i description uzupelniane dynamicznie przez gallery.js -->
+  <title>Projekt — Verami.Studio</title>
+  <meta name="description" content="" />
+  <meta name="robots"      content="index, follow, max-image-preview:large" />
+  <meta name="theme-color" content="#523A34" />
+
+  <!-- OG — uzupelniane dynamicznie -->
+  <meta property="og:type"      content="article" />
+  <meta property="og:site_name" content="Verami.Studio" />
+  <meta property="og:locale"    content="pl_PL" />
+  <meta property="og:title"     content="Projekt — Verami.Studio" />
+  <meta property="og:image"     content="https://verami.studio/assets/og-image.jpg" />
+  <meta property="og:image:width"  content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card"  content="summary_large_image" />
+  <meta name="twitter:image" content="https://verami.studio/assets/og-image.jpg" />
+
+  <!-- Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" />
+
+  <!-- Favicon -->
+  <link rel="icon"             href="assets/favicon.ico" sizes="any" />
+  <link rel="icon"             href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Przejdź do treści</a>
+
+<!-- NAV -->
+<header class="nav is-scrolled" role="banner">
+  <div class="nav__inner">
+    <a href="index.html" class="nav__logo" aria-label="Verami.Studio — strona główna">
+      <span class="nav__logo-name">Verami.Studio</span>
+      <span class="nav__logo-tagline">Projektowanie wnętrz</span>
+    </a>
+    <nav class="nav__links" aria-label="Nawigacja główna">
+      <a href="index.html"     class="nav__link">Strona główna</a>
+      <a href="o-mnie.html"    class="nav__link">O mnie</a>
+      <a href="portfolio.html" class="nav__link">Portfolio</a>
+      <a href="uslugi.html"    class="nav__link">Usługi</a>
+      <a href="kontakt.html"   class="nav__link">Kontakt</a>
+    </nav>
+    <a href="kontakt.html" class="btn btn--outline btn--sm nav__cta">Zarezerwuj konsultację</a>
+    <button class="nav__hamburger" aria-label="Otwórz menu" aria-expanded="false" aria-controls="mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="nav__mobile" id="mobile-menu" aria-label="Menu mobilne">
+  <a href="index.html"     class="nav__mobile-link">Strona główna</a>
+  <a href="o-mnie.html"    class="nav__mobile-link">O mnie</a>
+  <a href="portfolio.html" class="nav__mobile-link">Portfolio</a>
+  <a href="uslugi.html"    class="nav__mobile-link">Usługi</a>
+  <a href="kontakt.html"   class="nav__mobile-link">Kontakt</a>
+  <a href="kontakt.html" class="btn btn--outline nav__mobile-cta">Zarezerwuj konsultację</a>
+</nav>
+
+<main id="main-content">
+
+  <!-- BLAD -->
+  <div id="project-error" hidden
+       style="padding:calc(72px + 4rem) var(--container-px) 4rem;text-align:center;"
+       role="alert">
+    <p style="font-size:var(--text-2xl);font-weight:300;color:var(--color-dark-40);">
+      Nie znaleziono projektu.
+    </p>
+    <a href="portfolio.html" class="btn btn--outline" style="margin-top:var(--space-8);">
+      Wróć do portfolio
+    </a>
+  </div>
+
+  <!-- HERO COVER — src i alt uzupelniane przez gallery.js -->
+  <div class="project-hero">
+    <img
+      id="project-hero-img"
+      src=""
+      alt=""
+      class="project-hero__img"
+      width="1600"
+      height="900"
+      fetchpriority="high"
+      decoding="async"
+    />
+  </div>
+
+  <!-- BREADCRUMB — nawigacja okruszkowa (SEO) -->
+  <div class="container" style="padding-top:var(--space-6);padding-bottom:var(--space-2);">
+    <nav aria-label="Ścieżka nawigacji">
+      <ol style="display:flex;gap:var(--space-2);align-items:center;font-size:var(--text-xs);color:var(--color-dark-40);letter-spacing:0.04em;list-style:none;"
+          itemscope itemtype="https://schema.org/BreadcrumbList">
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="index.html"
+             itemprop="item"
+             style="color:var(--color-dark-40);transition:color var(--dur-fast);"
+             onmouseover="this.style.color='var(--color-dark)'"
+             onmouseout="this.style.color='var(--color-dark-40)'">
+            <span itemprop="name">Strona główna</span>
+          </a>
+          <meta itemprop="position" content="1" />
+        </li>
+        <li aria-hidden="true" style="opacity:0.4;">&#8250;</li>
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="portfolio.html"
+             itemprop="item"
+             style="color:var(--color-dark-40);transition:color var(--dur-fast);"
+             onmouseover="this.style.color='var(--color-dark)'"
+             onmouseout="this.style.color='var(--color-dark-40)'">
+            <span itemprop="name">Portfolio</span>
+          </a>
+          <meta itemprop="position" content="2" />
+        </li>
+        <li aria-hidden="true" style="opacity:0.4;">&#8250;</li>
+        <li id="project-breadcrumb"
+            aria-current="page"
+            style="color:var(--color-dark-80);"
+            itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <span itemprop="name"></span>
+          <meta itemprop="position" content="3" />
+        </li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- META PROJEKTU -->
+  <div class="container">
+    <dl class="project-meta" aria-label="Informacje o projekcie">
+      <div class="project-meta__item">
+        <dt class="project-meta__label">Kategoria</dt>
+        <dd class="project-meta__value" id="project-category">—</dd>
+      </div>
+      <div class="project-meta__item">
+        <dt class="project-meta__label">Lokalizacja</dt>
+        <dd class="project-meta__value" id="project-location">—</dd>
+      </div>
+      <div class="project-meta__item">
+        <dt class="project-meta__label">Metraż</dt>
+        <dd class="project-meta__value" id="project-area">—</dd>
+      </div>
+      <div class="project-meta__item">
+        <dt class="project-meta__label">Projekt</dt>
+        <dd class="project-meta__value">Verami.Studio</dd>
+      </div>
+    </dl>
+  </div>
+
+  <!-- TYTUL + OPIS -->
+  <div class="container">
+    <div class="project-body">
+      <div>
+        <!-- H1 uzupelniane przez gallery.js -->
+        <h1 id="project-title"
+            style="font-size:clamp(var(--text-2xl),4vw,var(--text-3xl));font-weight:300;line-height:var(--leading-snug);position:sticky;top:calc(72px + var(--space-6));">
+          Ładowanie...
+        </h1>
+      </div>
+      <div>
+        <p class="project-description reveal" id="project-description"></p>
+        <div class="project-cta reveal reveal-delay-2">
+          <h2 class="project-cta__title">Chcesz podobny efekt u siebie?</h2>
+          <p class="project-cta__subtitle">
+            Każde wnętrze to osobna historia. Porozmawiajmy o Twoim.
+            Pierwsze spotkanie jest bezpłatne i niezobowiązujące.
+          </p>
+          <a href="kontakt.html" class="btn btn--primary">
+            Zarezerwuj konsultację
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALERIA -->
+  <section class="section" style="padding-top:0;" aria-labelledby="gallery-heading">
+    <div class="container">
+      <h2 class="sr-only" id="gallery-heading">Galeria zdjec projektu</h2>
+
+      <div id="project-loading"
+           style="text-align:center;padding:var(--space-16) 0;color:var(--color-dark-40);font-size:var(--text-xl);"
+           aria-live="polite">
+        Ładowanie galerii...
+      </div>
+
+      <!-- Galeria uzupelniana przez gallery.js -->
+      <div class="gallery"
+           id="project-gallery"
+           aria-label="Galeria zdjęć projektu"></div>
+    </div>
+  </section>
+
+  <!-- POWROT -->
+  <div class="container" style="padding-bottom:var(--space-16);text-align:center;">
+    <a href="portfolio.html" class="btn btn--ghost">
+      &#8592; Wróć do portfolio
+    </a>
+  </div>
+
+</main>
+
+<!-- LIGHTBOX -->
+<div id="lightbox"
+     class="lightbox"
+     role="dialog"
+     aria-modal="true"
+     aria-label="Podgląd zdjęcia"
+     aria-hidden="true">
+  <button class="lightbox__close" id="lightbox-close" aria-label="Zamknij podgląd">&#x2715;</button>
+  <button class="lightbox__nav lightbox__nav--prev" id="lightbox-prev" aria-label="Poprzednie zdjęcie">&#8249;</button>
+  <img src=""
+       alt=""
+       class="lightbox__img"
+       id="lightbox-img"
+       loading="lazy"
+       decoding="async" />
+  <button class="lightbox__nav lightbox__nav--next" id="lightbox-next" aria-label="Następne zdjęcie">&#8250;</button>
+  <p class="lightbox__counter" id="lightbox-counter" aria-live="polite" aria-atomic="true"></p>
+</div>
+
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="footer__grid">
+      <div>
+        <p class="footer__brand-name">Verami.Studio</p>
+        <p class="footer__brand-desc">Tworzę przestrzenie, w których żyje się z przyjemnością.</p>
+      </div>
+      <nav aria-label="Stopka — nawigacja">
+        <p class="footer__heading">Nawigacja</p>
+        <ul class="footer__links">
+          <li><a href="index.html"     class="footer__link">Strona główna</a></li>
+          <li><a href="o-mnie.html"    class="footer__link">O mnie</a></li>
+          <li><a href="portfolio.html" class="footer__link">Portfolio</a></li>
+          <li><a href="uslugi.html"    class="footer__link">Usługi</a></li>
+          <li><a href="kontakt.html"   class="footer__link">Kontakt</a></li>
+        </ul>
+      </nav>
+      <address style="font-style:normal;">
+        <p class="footer__heading">Kontakt</p>
+        <div class="footer__contact-item">
+          <span class="footer__contact-label">Email</span>
+          <a href="mailto:verami.studio@gmail.com" class="footer__contact-value">verami.studio@gmail.com</a>
+        </div>
+        <div class="footer__contact-item">
+          <span class="footer__contact-label">Telefon</span>
+          <a href="tel:+48791353793" class="footer__contact-value">791&nbsp;353&nbsp;793</a>
+        </div>
+      </address>
+    </div>
+    <div class="footer__bottom">
+      <p class="footer__copy">&copy; <span id="footer-year"></span> Verami.Studio. Wszelkie prawa zastrzeżone.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"       defer></script>
+<script src="js/animations.js" defer></script>
+<script src="js/gallery.js"    defer></script>
+<script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

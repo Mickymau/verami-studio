@@ -1,0 +1,12 @@
+# Pliki robocze
+konwertuj.py
+FORMSPREE-INSTRUKCJA.txt
+reszta zdjęć do portfolio/
+
+# Oryginalne zdjęcia (używamy tylko .webp)
+portfolio/**/*.jpg
+portfolio/**/*.png
+portfolio/**/*.jfif
+
+# Opisy projektów
+portfolio/**/*.txt

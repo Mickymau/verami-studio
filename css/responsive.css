@@ -1,0 +1,291 @@
+/* ============================================
+   VERAMI.STUDIO — responsive.css
+   Mobile-first breakpointy
+   
+   Podejście: najpierw mobile, potem powiekszamy
+   
+   Breakpointy:
+   sm:  480px  — duzy telefon / maly tablet
+   md:  640px  — tablet pionowy
+   lg:  900px  — tablet poziomy / maly desktop
+   xl:  1100px — desktop
+   2xl: 1280px — duzy desktop
+   ============================================ */
+
+
+/* ================================================
+   MOBILE — ukrycie page-hero na stronie kontaktu
+   ================================================ */
+
+.page-hero--hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .page-hero--hidden-mobile {
+    display: block;
+  }
+}
+
+
+/* ================================================
+   SM — 480px
+   ================================================ */
+
+@media (min-width: 480px) {
+
+  /* Grid portfolio — 2 kolumny */
+  .portfolio-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .portfolio-preview-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Galeria — 2 kolumny */
+  .gallery {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Meta projektu — 2 kolumny */
+  .project-meta {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Wartosci o-mnie */
+  .about-values {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+}
+
+
+/* ================================================
+   MD — 640px
+   ================================================ */
+
+@media (min-width: 640px) {
+
+  /* Sekcja: uslugi — numer boczny */
+  .service-item {
+    grid-template-columns: 48px 1fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  /* Meta projektu — 4 kolumny */
+  .project-meta {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Galeria — pierwsze zdjecie szersze */
+  .gallery {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .gallery__item:first-child {
+    grid-column: span 2;
+  }
+
+  .gallery__item:first-child .gallery__img {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Footer grid */
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+
+/* ================================================
+   LG — 900px
+   Desktop
+   ================================================ */
+
+@media (min-width: 900px) {
+
+  /* NAV — pokaz linki, ukryj hamburger */
+  .nav__links {
+    display: flex;
+  }
+
+  .nav__cta {
+    display: inline-flex !important;
+  }
+
+  .nav__hamburger {
+    display: none;
+  }
+
+  /* Sekcja O mnie — dwie kolumny */
+  .about-preview {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Sekcja About na podstronie */
+  .about-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Kontakt — dwie kolumny */
+  .contact-layout {
+    grid-template-columns: 1fr 1.5fr;
+  }
+
+  /* Proces — 2 kolumny */
+  .process {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .process__step {
+    padding: var(--space-10) var(--space-8);
+    border-right: 1px solid var(--color-dark-12);
+    border-top: 1px solid var(--color-dark-12);
+  }
+
+  .process__step:nth-child(2n) {
+    border-right: none;
+  }
+
+  /* Projekt — tytul sticky w lewej kolumnie */
+  .project-body {
+    grid-template-columns: 1fr 2fr;
+    gap: var(--space-20);
+  }
+
+  /* Uslugi — cena z prawej */
+  .service-item {
+    grid-template-columns: 48px 1fr auto;
+    align-items: start;
+  }
+
+  .service-item__price {
+    text-align: right;
+    padding-top: 2px;
+  }
+
+  /* Portfolio grid — 3 kolumny */
+  .portfolio-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Podglad portfolio — pierwsza karta szersza */
+  .portfolio-preview-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .portfolio-preview-grid .project-card:first-child {
+    grid-column: span 2;
+  }
+
+  .portfolio-preview-grid .project-card:first-child .project-card__image-wrap {
+    aspect-ratio: 16 / 10;
+  }
+
+  /* Galeria — 3 kolumny */
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .gallery__item:first-child {
+    grid-column: span 2;
+  }
+
+  .gallery__item:first-child .gallery__img {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Footer — 3 kolumny */
+  .footer__grid {
+    grid-template-columns: 1.8fr 1fr 1fr;
+  }
+
+}
+
+
+/* ================================================
+   XL — 1100px
+   ================================================ */
+
+@media (min-width: 1100px) {
+
+  /* Hero tytul jeszcze wiekszy */
+  .hero__title {
+    max-width: 900px;
+  }
+
+  /* Portfolio grid — opcjonalnie 4 kolumny */
+  /* Zakomentuj jesli wolisz zostac przy 3 */
+  /*
+  .portfolio-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  */
+
+  /* Wieksza galeria na stronie projektu */
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+}
+
+
+/* ================================================
+   2XL — 1280px
+   ================================================ */
+
+@media (min-width: 1280px) {
+
+  /* Podglad portfolio — pelny ukad */
+  .portfolio-preview-grid {
+    gap: var(--space-5);
+  }
+
+  /* Wieksza wysokosc hero zdjecia projektu */
+  .project-hero__img {
+    height: clamp(400px, 65vh, 760px);
+  }
+
+}
+
+
+/* ================================================
+   PRINT — minimalny styl druku
+   ================================================ */
+
+@media print {
+
+  .nav,
+  .nav__mobile,
+  .hero__scroll,
+  .lightbox,
+  .footer {
+    display: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    color: #000;
+    background: #fff;
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 2cm 0;
+  }
+
+  .hero__title {
+    font-size: 24pt;
+    color: #000;
+  }
+
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+}
