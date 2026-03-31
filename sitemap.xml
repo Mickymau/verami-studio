@@ -5,36 +5,36 @@
           http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
   <url>
-    <loc>https://verami.studio/</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://veramistudio.pl/</loc>
+    <lastmod>2025-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://verami.studio/portfolio.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://veramistudio.pl/portfolio.html</loc>
+    <lastmod>2025-03-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://verami.studio/uslugi.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://veramistudio.pl/uslugi.html</loc>
+    <lastmod>2025-03-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
-    <loc>https://verami.studio/o-mnie.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://veramistudio.pl/o-mnie.html</loc>
+    <lastmod>2025-03-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://verami.studio/kontakt.html</loc>
-    <lastmod>2025-01-15</lastmod>
+    <loc>https://veramistudio.pl/kontakt.html</loc>
+    <lastmod>2025-03-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
