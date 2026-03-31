@@ -31,7 +31,7 @@
      ------------------------------------------------ */
 
   /* ID formularza z Formspree.io — wklej po rejestracji */
-  const FORMSPREE_ID = '';
+  const FORMSPREE_ID = 'xkopbzbw';
 
   /* Adres e-mail dla fallbacku mailto */
   const CONTACT_EMAIL = 'verami.studio@gmail.com';
