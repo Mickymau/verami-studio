@@ -158,29 +158,29 @@
     /* Stan ladowania */
     if (submitBtn) {
       submitBtn.disabled    = true;
-      submitBtn.textContent = 'Wysylam\u2026';
+      submitBtn.textContent = 'Wysyłam…';
     }
-    showStatus('loading', 'Wysylam wiadomosc\u2026');
+    showStatus('loading', 'Wysyłam wiadomość…');
 
     /* Wyslij */
     try {
       if (FORMSPREE_ID) {
         await sendViaFormspree(name, email, message);
         form.reset();
-        showStatus('success', 'Wiadomosc wyslana! Odezwe sie wkrotce \u2014 zwykle w ciagu 24h.');
+        showStatus('success', 'Wiadomość wysłana! Odezwę się wkrótce — zwykle w ciągu 24h.');
       } else {
         /* Brak Formspree ID — fallback na mailto */
         sendViaMailto(name, email, message);
-        showStatus('success', 'Otwieram klienta pocztowego z gotowa wiadomoscia\u2026');
+        showStatus('success', 'Otwieram klienta pocztowego z gotową wiadomością…');
       }
     } catch (err) {
       console.error('[form.js]', err);
       /* Przy bledzie Formspree sprobuj mailto jako ratunek */
       try {
         sendViaMailto(name, email, message);
-        showStatus('success', 'Otwieram klienta pocztowego (plan B)\u2026');
+        showStatus('success', 'Otwieram klienta pocztowego (plan B)…');
       } catch {
-        showStatus('error', 'Wystapil blad. Napisz bezposrednio na: ' + CONTACT_EMAIL);
+        showStatus('error', 'Wystąpił błąd. Napisz bezpośrednio na: ' + CONTACT_EMAIL);
       }
     } finally {
       if (submitBtn) {
