@@ -56,13 +56,17 @@
     nav.classList.add('is-scrolled');
   }
 
+  const page   = location.pathname.split('/').pop() || 'index.html';
+  const isHome  = (page === '' || page === 'index.html');
+
   function close() {
     hamburger.classList.remove('is-open');
     mobileMenu.classList.remove('is-open');
     document.body.style.overflow = '';
     hamburger.setAttribute('aria-expanded', 'false');
-    /* Przywroc transparentny nav jesli uzytkownik jest na gorze strony */
-    if (window.scrollY <= 40) {
+    /* Na stronie glownej: przywroc transparentny nav jesli jestesmy na gorze */
+    /* Na podstronach: is-scrolled zawsze zostaje */
+    if (isHome && window.scrollY <= 40) {
       nav.classList.remove('is-scrolled');
     }
   }
