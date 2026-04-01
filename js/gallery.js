@@ -1,37 +1,23 @@
 /* ============================================
    VERAMI.STUDIO — gallery.js
    Strona projektu (projekt.html).
-
-   Dzialanie:
-   1. Odczytuje ?project=nazwa-folderu z URL
-   2. Pobiera meta.json projektu
-   3. Wstrzykuje tytul, opis, metadane
-   4. Autodetekcja zdjec: 01.webp > 01.jpg > 01.png … az do 404
-      (kolejnosc: webp ma pierwszenstwo jako najszybszy format)
-   5. Renderuje galerie miniatur
-   6. Lightbox z nawigacja klawiatura i swipe
    ============================================ */
 
 'use strict';
 
 (function initGallery() {
 
-  /* Wyjdz jesli nie jestesmy na stronie projektu */
   const galleryEl = document.getElementById('project-gallery');
   if (!galleryEl) return;
 
-  /* ------------------------------------------------
-     URL PARAM
-     ------------------------------------------------ */
   const folder = new URLSearchParams(location.search).get('project');
-
   if (!folder) {
     window.location.replace('portfolio.html');
     return;
   }
 
   /* ------------------------------------------------
-     REFERENCJE DO DOM
+     REFERENCJE DOM
      ------------------------------------------------ */
   const sliderEl    = document.getElementById('hero-slider');
   const sliderTrack = document.getElementById('hero-slider-track');
@@ -39,66 +25,50 @@
   const sliderNext  = document.getElementById('hero-slider-next');
   const sliderDots  = document.getElementById('hero-slider-dots');
   const titleEl     = document.getElementById('project-title');
-  const categoryEl   = document.getElementById('project-category');
-  const locationEl   = document.getElementById('project-location');
-  const areaEl       = document.getElementById('project-area');
-  const descEl       = document.getElementById('project-description');
+  const categoryEl  = document.getElementById('project-category');
+  const locationEl  = document.getElementById('project-location');
+  const areaEl      = document.getElementById('project-area');
+  const descEl      = document.getElementById('project-description');
   const breadcrumbEl = document.getElementById('project-breadcrumb');
-  const loadingEl    = document.getElementById('project-loading');
-  const errorEl      = document.getElementById('project-error');
+  const loadingEl   = document.getElementById('project-loading');
+  const errorEl     = document.getElementById('project-error');
 
   /* ------------------------------------------------
      NARZEDZIA
      ------------------------------------------------ */
-
-  /* Sprawdz czy obraz sie laduje */
   function probeImage(url) {
     return new Promise(resolve => {
       const img = new Image();
       img.onload  = () => resolve(true);
       img.onerror = () => resolve(false);
-      img.src     = url;
+      img.src = url;
     });
   }
 
-  /* Znajdz cover: webp > jpg > png.
-     Zwraca cover.webp od razu (bez probe) — przeglądarka sama obsłuży błąd.
-     Probe tylko gdy webp nie istnieje. */
   async function findCover(f) {
-    const preferred = `portfolio/${f}/cover.webp`;
-    if (await probeImage(preferred)) return preferred;
-    const jpg = `portfolio/${f}/cover.jpg`;
-    if (await probeImage(jpg)) return jpg;
-    return `portfolio/${f}/cover.png`;
+    for (const ext of ['webp', 'jpg', 'png']) {
+      const url = `portfolio/${f}/cover.${ext}`;
+      if (await probeImage(url)) return url;
+    }
+    return `portfolio/${f}/cover.webp`;
   }
 
-  /* Autodetekcja zdjec galerii rownolegla:
-     Sprawdza kilka numerow naraz, przerywa przy pierwszej luce. */
   async function discoverImages(f) {
     const found = [];
-    const BATCH = 5; /* ile numerow sprawdzamy jednoczesnie */
-
+    const BATCH = 5;
     for (let i = 1; i <= 40; i += BATCH) {
-      /* Przygotuj batch kandydatow */
-      const batch = [];
-      for (let j = i; j < i + BATCH && j <= 40; j++) {
-        const pad  = String(j).padStart(2, '0');
-        const exts = ['webp', 'jpg', 'png'];
-        batch.push({ num: j, pad, exts });
-      }
-
-      /* Sprawdz wszystkie w batchu rownolegla */
       const results = await Promise.all(
-        batch.map(async ({ pad, exts }) => {
-          for (const ext of exts) {
-            const url = `portfolio/${f}/${pad}.${ext}`;
-            if (await probeImage(url)) return url;
-          }
-          return null;
+        Array.from({ length: Math.min(BATCH, 41 - i) }, (_, k) => {
+          const pad = String(i + k).padStart(2, '0');
+          return (async () => {
+            for (const ext of ['webp', 'jpg', 'png']) {
+              const url = `portfolio/${f}/${pad}.${ext}`;
+              if (await probeImage(url)) return url;
+            }
+            return null;
+          })();
         })
       );
-
-      /* Dodaj wyniki az do pierwszej luki */
       let gap = false;
       for (const url of results) {
         if (!url) { gap = true; break; }
@@ -106,60 +76,7 @@
       }
       if (gap) break;
     }
-
     return found;
-  }
-
-  /* Ustaw src i klase .is-loaded po zaladowaniu obrazu */
-  function loadImg(img, src, alt) {
-    img.alt = alt || '';
-    img.src = src;
-    const done = () => img.classList.add('is-loaded');
-    img.complete ? done() : img.addEventListener('load', done, { once: true });
-    img.addEventListener('error', done, { once: true });
-  }
-
-  /* ------------------------------------------------
-     GLOWNA INICJALIZACJA
-     ------------------------------------------------ */
-  async function init() {
-    try {
-      /* 1. Pobierz meta.json */
-      const res = await fetch(`portfolio/${folder}/meta.json`);
-      if (!res.ok) throw new Error(`meta.json not found (${res.status})`);
-      const meta = await res.json();
-
-      /* 2. SEO */
-      document.title = `${meta.title || 'Projekt'} \u2014 Verami.Studio`;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', (meta.description || '').slice(0, 155));
-      }
-
-      /* 3. Pola tekstowe */
-      setText(titleEl,      meta.title);
-      setText(categoryEl,   meta.category);
-      setText(locationEl,   meta.location);
-      setText(areaEl,       meta.area);
-      setText(descEl,       meta.description);
-      setText(breadcrumbEl, meta.title);
-
-      /* 4. Cover — od razu, bez czekania na galerię */
-      const coverSrc = await findCover(folder);
-      buildSlider([coverSrc], meta.title); /* slider z 1 zdjęciem — natychmiast */
-
-      /* 5. Galeria — równolegle z coverem, dobudowuje slider po załadowaniu */
-      const images = await discoverImages(folder);
-      if (images.length > 0) {
-        expandSlider([coverSrc, ...images], meta.title);
-      }
-      renderGallery([coverSrc, ...images]);
-
-    } catch (err) {
-      console.error('[gallery.js]', err);
-      if (loadingEl) loadingEl.remove();
-      if (errorEl)   errorEl.removeAttribute('hidden');
-    }
   }
 
   function setText(el, val) {
@@ -167,157 +84,205 @@
   }
 
   /* ------------------------------------------------
-     HERO SLIDER
-     Stan wspoldzielony przez buildSlider i expandSlider.
+     GLOWNA INICJALIZACJA
      ------------------------------------------------ */
+  async function init() {
+    try {
+      const res = await fetch(`portfolio/${folder}/meta.json`);
+      if (!res.ok) throw new Error(`meta.json not found (${res.status})`);
+      const meta = await res.json();
 
-  /*
-   * INFINITE LOOP SLIDER
-   * Struktura track:  [klon-ostatni] [0] [1] ... [n-1] [klon-pierwszy]
-   * Startujemy na pozycji 1 (pierwszy prawdziwy slajd).
-   * Gdy wchodzimy na klon — przeskakujemy na odpowiednik bez animacji.
-   */
+      /* SEO */
+      document.title = `${meta.title || 'Projekt'} \u2014 Verami.Studio`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', (meta.description || '').slice(0, 155));
 
-  const slider = { current: 0, total: 0, busy: false };
+      /* Teksty */
+      setText(titleEl,      meta.title);
+      setText(categoryEl,   meta.category);
+      setText(locationEl,   meta.location);
+      setText(areaEl,       meta.area);
+      setText(descEl,       meta.description);
+      setText(breadcrumbEl, meta.title);
 
-  function sliderGoTo(realIndex) {
-    /* realIndex: 0..total-1, pozycja w tracku: realIndex+1 */
-    slider.current = ((realIndex % slider.total) + slider.total) % slider.total;
-    if (sliderTrack) {
-      sliderTrack.style.transition = 'transform 0.5s var(--ease-out)';
-      sliderTrack.style.transform  = `translateX(-${(slider.current + 1) * 100}%)`;
-    }
-    if (sliderDots) {
-      sliderDots.querySelectorAll('.hero-slider__dot')
-        .forEach((d, i) => d.classList.toggle('is-active', i === slider.current));
+      /* Cover natychmiast */
+      const coverSrc = await findCover(folder);
+      initSlider([coverSrc], meta.title);
+
+      /* Reszta zdjec w tle */
+      const rest = await discoverImages(folder);
+      const allImages = [coverSrc, ...rest];
+      if (rest.length > 0) {
+        initSlider(allImages, meta.title);
+      }
+      renderGallery(allImages);
+
+    } catch (err) {
+      console.error('[gallery.js]', err);
+      if (loadingEl) loadingEl.remove();
+      if (errorEl) errorEl.removeAttribute('hidden');
     }
   }
 
-  function renderSliderDOM(images, title) {
+  /* ------------------------------------------------
+     SLIDER
+     Prosta architektura: jeden obiekt stanu,
+     jeden zestaw listenerow (podpinany tylko raz).
+     Infinite loop przez klony na krawędziach.
+
+     Struktura track: [klon-ostatni][0][1]...[n-1][klon-pierwszy]
+     Pozycja w tracku = realIndex + 1
+     ------------------------------------------------ */
+
+  /* Stan globalny slidera */
+  const S = {
+    images:   [],   /* aktualna lista zdjec */
+    idx:      0,    /* aktualny realIndex (0..n-1) */
+    animating: false,
+    booted:   false /* czy listenery juz podpiete */
+  };
+
+  function sliderSetPosition(trackPos, animate) {
+    if (!sliderTrack) return;
+    sliderTrack.style.transition = animate ? 'transform 0.5s ease' : 'none';
+    sliderTrack.style.transform  = `translateX(-${trackPos * 100}%)`;
+  }
+
+  function sliderUpdateDots() {
+    if (!sliderDots) return;
+    sliderDots.querySelectorAll('.hero-slider__dot')
+      .forEach((d, i) => d.classList.toggle('is-active', i === S.idx));
+  }
+
+  function sliderGo(direction) {
+    /* direction: +1 (next) lub -1 (prev) */
+    if (S.animating || S.images.length <= 1) return;
+    S.animating = true;
+
+    S.idx = ((S.idx + direction + S.images.length) % S.images.length);
+    sliderSetPosition(S.idx + 1, true);
+    sliderUpdateDots();
+  }
+
+  function initSlider(images, title) {
     if (!sliderEl || !sliderTrack) return;
 
-    const total = images.length;
+    S.images = images;
+    S.idx    = 0;
+    S.animating = false;
 
-    /* Slajdy z klonami na krawędziach */
-    const slideHTML = (src, i, label) => `
+    const n = images.length;
+
+    /* Buduj DOM */
+    const makeSlide = (src, i) => `
       <div class="hero-slider__slide">
         <img
           src="${src}"
-          alt="${title || ''} — ${label}"
+          alt="${title || ''} \u2014 zdj\u0119cie ${i + 1}"
           ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
           decoding="async"
           width="1600" height="900"
         />
       </div>`;
 
+    /* [klon-ostatni] + wszystkie slajdy + [klon-pierwszego] */
     sliderTrack.innerHTML =
-      slideHTML(images[total - 1], total - 1, `zdjęcie ${total} (klon)`) +   /* klon ostatniego */
-      images.map((src, i) => slideHTML(src, i, `zdjęcie ${i + 1}`)).join('') +
-      slideHTML(images[0], 0, `zdjęcie 1 (klon)`);                          /* klon pierwszego */
+      makeSlide(images[n - 1], n - 1) +
+      images.map((src, i) => makeSlide(src, i)).join('') +
+      makeSlide(images[0], 0);
 
-    /* Ustaw pozycję startową na slajd 0 (pozycja 1 w tracku) bez animacji */
-    sliderTrack.style.transition = 'none';
-    sliderTrack.style.transform  = `translateX(-100%)`;
+    /* Ustaw na slajd 0 bez animacji */
+    sliderSetPosition(1, false);
 
+    /* Kropki */
     if (sliderDots) {
-      sliderDots.innerHTML = images.map((_, i) => `
-        <button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdjęcie ${i + 1}"></button>
-      `).join('');
+      sliderDots.innerHTML = images.map((_, i) =>
+        `<button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdj\u0119cie ${i + 1}"></button>`
+      ).join('');
       sliderDots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
-        dot.addEventListener('click', () => sliderGoTo(i));
+        dot.onclick = () => {
+          if (S.animating) return;
+          S.animating = true;
+          S.idx = i;
+          sliderSetPosition(i + 1, true);
+          sliderUpdateDots();
+        };
       });
     }
 
-    slider.current = 0;
-    slider.total   = total;
-    slider.busy    = false;
+    /* Ukryj strzalki i kropki gdy 1 zdjecie */
+    sliderEl.classList.toggle('hero-slider--single', n <= 1);
 
-    sliderEl.classList.toggle('hero-slider--single', total <= 1);
-  }
+    /* Listenery podpinamy tylko raz przy pierwszym wywolaniu */
+    if (S.booted) return;
+    S.booted = true;
 
-  function buildSlider(images, title) {
-    renderSliderDOM(images, title);
+    /* Po animacji: jesli jestesmy na klonie — skocz na oryginał */
+    sliderTrack.addEventListener('transitionend', () => {
+      S.animating = false;
+      const trackPos = S.idx + 1;
+      const n2 = S.images.length;
 
-    /* Po zakończeniu animacji — sprawdź czy jesteśmy na klonie i prześkoczyć */
-    sliderTrack?.addEventListener('transitionend', () => {
-      const pos = slider.current + 1; /* pozycja w tracku */
-      const end = slider.total + 1;   /* pozycja klonu pierwszego */
-
-      if (pos === 0) {
-        /* Weszliśmy na klon ostatniego — skocz na prawdziwy ostatni */
-        sliderTrack.style.transition = 'none';
-        sliderTrack.style.transform  = `translateX(-${slider.total * 100}%)`;
-        slider.current = slider.total - 1;
-      } else if (pos === end) {
-        /* Weszliśmy na klon pierwszego — skocz na prawdziwy pierwszy */
-        sliderTrack.style.transition = 'none';
-        sliderTrack.style.transform  = `translateX(-100%)`;
-        slider.current = 0;
+      /* Przyszlismy na klon pierwszego (za ostatnim slajdem) */
+      if (trackPos > n2) {
+        S.idx = 0;
+        sliderSetPosition(1, false);
+        sliderUpdateDots();
+      }
+      /* Przyszlismy na klon ostatniego (przed pierwszym slajdem) */
+      else if (trackPos < 1) {
+        S.idx = n2 - 1;
+        sliderSetPosition(n2, false);
+        sliderUpdateDots();
       }
     });
 
-    /* Strzalki i swipe — podepnij tylko raz */
-    let touchStartX = 0;
+    /* Strzalki */
+    sliderPrev?.addEventListener('click', () => sliderGo(-1));
+    sliderNext?.addEventListener('click', () => sliderGo(+1));
 
-    sliderPrev?.addEventListener('click', () => sliderGoTo(slider.current - 1));
-    sliderNext?.addEventListener('click', () => sliderGoTo(slider.current + 1));
-
-    sliderEl?.addEventListener('touchstart', e => {
-      touchStartX = e.changedTouches[0].clientX;
+    /* Swipe */
+    let touchX = 0;
+    sliderEl.addEventListener('touchstart', e => {
+      touchX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    sliderEl.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 50) sliderGo(dx < 0 ? +1 : -1);
     }, { passive: true });
 
-    sliderEl?.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 50) sliderGoTo(dx < 0 ? slider.current + 1 : slider.current - 1);
-    }, { passive: true });
-
-    sliderEl?.addEventListener('keydown', e => {
-      if (e.key === 'ArrowLeft')  sliderGoTo(slider.current - 1);
-      if (e.key === 'ArrowRight') sliderGoTo(slider.current + 1);
+    /* Klawiatura */
+    sliderEl.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  sliderGo(-1);
+      if (e.key === 'ArrowRight') sliderGo(+1);
     });
   }
 
-  /* Rozbuduj slider o wszystkie zdjecia po wykryciu galerii */
-  function expandSlider(images, title) {
-    renderSliderDOM(images, title);
-  }
-
   /* ------------------------------------------------
-     RENDEROWANIE GALERII
+     GALERIA MINIATUR
      ------------------------------------------------ */
   function renderGallery(images) {
     if (loadingEl) loadingEl.remove();
 
     if (!images.length) {
-      galleryEl.innerHTML = `
-        <p style="grid-column:1/-1;text-align:center;
-                  padding:3rem 0;color:var(--color-dark-40);">
-          Brak zdjec galerii.
-        </p>`;
+      galleryEl.innerHTML = `<p style="grid-column:1/-1;text-align:center;padding:3rem 0;color:var(--color-dark-40);">Brak zdjec galerii.</p>`;
       return;
     }
 
-    galleryEl.innerHTML = images
-      .map((src, i) => `
-        <div class="gallery__item reveal" data-index="${i}">
-          <img
-            src="${src}"
-            alt="Zdjecie ${i + 1} z ${images.length}"
-            class="gallery__img"
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-      `)
-      .join('');
+    galleryEl.innerHTML = images.map((src, i) => `
+      <div class="gallery__item reveal" data-index="${i}">
+        <img
+          src="${src}"
+          alt="Zdjecie ${i + 1} z ${images.length}"
+          class="gallery__img"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    `).join('');
 
-    /* Animacje reveal */
     window.dispatchEvent(new Event('revealRefresh'));
-
-    /* Lazy load */
     window.dispatchEvent(new Event('lazyRefresh'));
-
-    /* Lightbox */
     initLightbox(images);
   }
 
@@ -338,18 +303,14 @@
 
     function open(index) {
       current = ((index % total) + total) % total;
-
       lbImg.classList.remove('is-loaded');
       lbImg.src = images[current];
       lbImg.addEventListener('load',  () => lbImg.classList.add('is-loaded'), { once: true });
       lbImg.addEventListener('error', () => lbImg.classList.add('is-loaded'), { once: true });
-
       if (lbCount) lbCount.textContent = `${current + 1} / ${total}`;
-
       lb.classList.add('is-open');
       lb.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-
       lbClose?.focus();
     }
 
@@ -359,39 +320,31 @@
       document.body.style.overflow = '';
     }
 
-    const prev = () => open(current - 1);
-    const next = () => open(current + 1);
-
     galleryEl.addEventListener('click', e => {
       const item = e.target.closest('.gallery__item[data-index]');
       if (item) open(parseInt(item.dataset.index, 10));
     });
-
     galleryEl.querySelectorAll('.gallery__item').forEach(item => {
       item.style.cursor = 'zoom-in';
     });
 
     lbClose?.addEventListener('click', close);
-    lbPrev?.addEventListener('click',  prev);
-    lbNext?.addEventListener('click',  next);
-
+    lbPrev?.addEventListener('click',  () => open(current - 1));
+    lbNext?.addEventListener('click',  () => open(current + 1));
     lb.addEventListener('click', e => { if (e.target === lb) close(); });
 
     document.addEventListener('keydown', e => {
       if (!lb.classList.contains('is-open')) return;
       if (e.key === 'Escape')     close();
-      if (e.key === 'ArrowLeft')  prev();
-      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft')  open(current - 1);
+      if (e.key === 'ArrowRight') open(current + 1);
     });
 
     let touchX = 0;
-    lb.addEventListener('touchstart', e => {
-      touchX = e.changedTouches[0].clientX;
-    }, { passive: true });
-
-    lb.addEventListener('touchend', e => {
+    lb.addEventListener('touchstart', e => { touchX = e.changedTouches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend',   e => {
       const dx = e.changedTouches[0].clientX - touchX;
-      if (Math.abs(dx) > 50) dx < 0 ? next() : prev();
+      if (Math.abs(dx) > 50) dx < 0 ? open(current + 1) : open(current - 1);
     }, { passive: true });
   }
 
