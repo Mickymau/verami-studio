@@ -44,6 +44,8 @@
     mobileMenu.classList.add('is-open');
     document.body.style.overflow = 'hidden';
     hamburger.setAttribute('aria-expanded', 'true');
+    /* Wymusz is-scrolled gdy menu otwarte — logo i X zawsze ciemne */
+    nav.classList.add('is-scrolled');
   }
 
   function close() {
@@ -51,6 +53,10 @@
     mobileMenu.classList.remove('is-open');
     document.body.style.overflow = '';
     hamburger.setAttribute('aria-expanded', 'false');
+    /* Przywroc transparentny nav jesli uzytkownik jest na gorze strony */
+    if (window.scrollY <= 40) {
+      nav.classList.remove('is-scrolled');
+    }
   }
 
   hamburger.addEventListener('click', () => {
