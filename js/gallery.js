@@ -171,12 +171,21 @@
      Stan wspoldzielony przez buildSlider i expandSlider.
      ------------------------------------------------ */
 
-  const slider = { current: 0, total: 1 };
+  /*
+   * INFINITE LOOP SLIDER
+   * Struktura track:  [klon-ostatni] [0] [1] ... [n-1] [klon-pierwszy]
+   * Startujemy na pozycji 1 (pierwszy prawdziwy slajd).
+   * Gdy wchodzimy na klon — przeskakujemy na odpowiednik bez animacji.
+   */
 
-  function sliderGoTo(index) {
-    slider.current = ((index % slider.total) + slider.total) % slider.total;
+  const slider = { current: 0, total: 0, busy: false };
+
+  function sliderGoTo(realIndex) {
+    /* realIndex: 0..total-1, pozycja w tracku: realIndex+1 */
+    slider.current = ((realIndex % slider.total) + slider.total) % slider.total;
     if (sliderTrack) {
-      sliderTrack.style.transform = `translateX(-${slider.current * 100}%)`;
+      sliderTrack.style.transition = 'transform 0.5s var(--ease-out)';
+      sliderTrack.style.transform  = `translateX(-${(slider.current + 1) * 100}%)`;
     }
     if (sliderDots) {
       sliderDots.querySelectorAll('.hero-slider__dot')
@@ -187,37 +196,65 @@
   function renderSliderDOM(images, title) {
     if (!sliderEl || !sliderTrack) return;
 
-    sliderTrack.innerHTML = images.map((src, i) => `
+    const total = images.length;
+
+    /* Slajdy z klonami na krawędziach */
+    const slideHTML = (src, i, label) => `
       <div class="hero-slider__slide">
         <img
           src="${src}"
-          alt="${title || ''} — zdjęcie ${i + 1}"
+          alt="${title || ''} — ${label}"
           ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
           decoding="async"
           width="1600" height="900"
         />
-      </div>
-    `).join('');
+      </div>`;
+
+    sliderTrack.innerHTML =
+      slideHTML(images[total - 1], total - 1, `zdjęcie ${total} (klon)`) +   /* klon ostatniego */
+      images.map((src, i) => slideHTML(src, i, `zdjęcie ${i + 1}`)).join('') +
+      slideHTML(images[0], 0, `zdjęcie 1 (klon)`);                          /* klon pierwszego */
+
+    /* Ustaw pozycję startową na slajd 0 (pozycja 1 w tracku) bez animacji */
+    sliderTrack.style.transition = 'none';
+    sliderTrack.style.transform  = `translateX(-100%)`;
 
     if (sliderDots) {
       sliderDots.innerHTML = images.map((_, i) => `
         <button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdjęcie ${i + 1}"></button>
       `).join('');
-      /* Podepnij klik do nowych kropek */
       sliderDots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
         dot.addEventListener('click', () => sliderGoTo(i));
       });
     }
 
-    /* Zaktualizuj stan */
     slider.current = 0;
-    slider.total   = images.length;
+    slider.total   = total;
+    slider.busy    = false;
 
-    sliderEl.classList.toggle('hero-slider--single', images.length <= 1);
+    sliderEl.classList.toggle('hero-slider--single', total <= 1);
   }
 
   function buildSlider(images, title) {
     renderSliderDOM(images, title);
+
+    /* Po zakończeniu animacji — sprawdź czy jesteśmy na klonie i prześkoczyć */
+    sliderTrack?.addEventListener('transitionend', () => {
+      const pos = slider.current + 1; /* pozycja w tracku */
+      const end = slider.total + 1;   /* pozycja klonu pierwszego */
+
+      if (pos === 0) {
+        /* Weszliśmy na klon ostatniego — skocz na prawdziwy ostatni */
+        sliderTrack.style.transition = 'none';
+        sliderTrack.style.transform  = `translateX(-${slider.total * 100}%)`;
+        slider.current = slider.total - 1;
+      } else if (pos === end) {
+        /* Weszliśmy na klon pierwszego — skocz na prawdziwy pierwszy */
+        sliderTrack.style.transition = 'none';
+        sliderTrack.style.transform  = `translateX(-100%)`;
+        slider.current = 0;
+      }
+    });
 
     /* Strzalki i swipe — podepnij tylko raz */
     let touchStartX = 0;

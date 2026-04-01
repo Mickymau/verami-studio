@@ -483,7 +483,6 @@
 
 .hero-slider__track {
   display: flex;
-  transition: transform 0.5s var(--ease-out);
   will-change: transform;
 }
 
