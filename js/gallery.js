@@ -168,10 +168,23 @@
 
   /* ------------------------------------------------
      HERO SLIDER
+     Stan wspoldzielony przez buildSlider i expandSlider.
      ------------------------------------------------ */
 
-  /* Rozbuduj slider o nowe zdjęcia gdy galeria się załaduje */
-  function expandSlider(images, title) {
+  const slider = { current: 0, total: 1 };
+
+  function sliderGoTo(index) {
+    slider.current = ((index % slider.total) + slider.total) % slider.total;
+    if (sliderTrack) {
+      sliderTrack.style.transform = `translateX(-${slider.current * 100}%)`;
+    }
+    if (sliderDots) {
+      sliderDots.querySelectorAll('.hero-slider__dot')
+        .forEach((d, i) => d.classList.toggle('is-active', i === slider.current));
+    }
+  }
+
+  function renderSliderDOM(images, title) {
     if (!sliderEl || !sliderTrack) return;
 
     sliderTrack.innerHTML = images.map((src, i) => `
@@ -190,86 +203,46 @@
       sliderDots.innerHTML = images.map((_, i) => `
         <button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdjęcie ${i + 1}"></button>
       `).join('');
+      /* Podepnij klik do nowych kropek */
+      sliderDots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
+        dot.addEventListener('click', () => sliderGoTo(i));
+      });
     }
 
-    sliderEl.classList.remove('hero-slider--single');
-    _initSliderLogic(images);
+    /* Zaktualizuj stan */
+    slider.current = 0;
+    slider.total   = images.length;
+
+    sliderEl.classList.toggle('hero-slider--single', images.length <= 1);
   }
 
   function buildSlider(images, title) {
-    if (!sliderEl || !sliderTrack) return;
+    renderSliderDOM(images, title);
 
-    /* Slajdy */
-    sliderTrack.innerHTML = images.map((src, i) => `
-      <div class="hero-slider__slide">
-        <img
-          src="${src}"
-          alt="${title || ''} — zdjęcie ${i + 1}"
-          ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
-          decoding="async"
-          width="1600" height="900"
-        />
-      </div>
-    `).join('');
+    /* Strzalki i swipe — podepnij tylko raz */
+    let touchStartX = 0;
 
-    /* Kropki */
-    if (sliderDots) {
-      sliderDots.innerHTML = images.map((_, i) => `
-        <button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdjęcie ${i + 1}"></button>
-      `).join('');
-    }
+    sliderPrev?.addEventListener('click', () => sliderGoTo(slider.current - 1));
+    sliderNext?.addEventListener('click', () => sliderGoTo(slider.current + 1));
 
-    /* Ukryj kontrolki gdy 1 zdjecie */
-    if (images.length <= 1) {
-      sliderEl.classList.add('hero-slider--single');
-    }
+    sliderEl?.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
 
-    _initSliderLogic(images);
+    sliderEl?.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) sliderGoTo(dx < 0 ? slider.current + 1 : slider.current - 1);
+    }, { passive: true });
+
+    sliderEl?.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  sliderGoTo(slider.current - 1);
+      if (e.key === 'ArrowRight') sliderGoTo(slider.current + 1);
+    });
   }
 
-  /* Logika nawigacji slidera — wywoływana tez przez expandSlider */
-  let _sliderListenersAttached = false;
-  let _goTo = null;
-
-  function _initSliderLogic(images) {
-    let current = 0;
-    const total = images.length;
-
-    _goTo = function(index) {
-      current = ((index % total) + total) % total;
-      sliderTrack.style.transform = `translateX(-${current * 100}%)`;
-      const dots = sliderDots ? Array.from(sliderDots.querySelectorAll('.hero-slider__dot')) : [];
-      dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
-    };
-
-    /* Odswiezenie kropek po expandSlider */
-    if (sliderDots) {
-      sliderDots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
-        dot.onclick = () => _goTo(i);
-      });
-    }
-
-    /* Strzalki i swipe — dodaj tylko raz */
-    if (!_sliderListenersAttached) {
-      sliderPrev?.addEventListener('click', () => _goTo && _goTo(current - 1));
-      sliderNext?.addEventListener('click', () => _goTo && _goTo(current + 1));
-
-      let touchStartX = 0;
-      sliderEl.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].clientX;
-      }, { passive: true });
-      sliderEl.addEventListener('touchend', e => {
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        if (Math.abs(dx) > 50) _goTo && _goTo(dx < 0 ? current + 1 : current - 1);
-      }, { passive: true });
-
-      sliderEl.addEventListener('keydown', e => {
-        if (e.key === 'ArrowLeft')  _goTo && _goTo(current - 1);
-        if (e.key === 'ArrowRight') _goTo && _goTo(current + 1);
-      });
-
-      _sliderListenersAttached = true;
-    }
+  /* Rozbuduj slider o wszystkie zdjecia po wykryciu galerii */
+  function expandSlider(images, title) {
+    renderSliderDOM(images, title);
   }
 
   /* ------------------------------------------------
