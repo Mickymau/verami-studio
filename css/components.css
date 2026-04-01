@@ -471,6 +471,101 @@
 }
 
 /* ================================================
+   HERO SLIDER (projekt.html)
+   ================================================ */
+
+.hero-slider {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-dark);
+}
+
+.hero-slider__track {
+  display: flex;
+  transition: transform 0.5s var(--ease-out);
+  will-change: transform;
+}
+
+.hero-slider__slide {
+  flex: 0 0 100%;
+  width: 100%;
+}
+
+.hero-slider__slide img {
+  width: 100%;
+  height: clamp(280px, 55vh, 660px);
+  object-fit: cover;
+  display: block;
+}
+
+/* Strzalki */
+.hero-slider__btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(10, 7, 6, 0.35);
+  border: none;
+  color: rgba(241, 242, 237, 0.85);
+  font-size: 2rem;
+  font-weight: 200;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  transition:
+    background var(--dur-fast),
+    color var(--dur-fast);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hero-slider__btn:hover {
+  background: rgba(10, 7, 6, 0.6);
+  color: var(--color-light);
+}
+
+.hero-slider__btn--prev { left: var(--space-4); }
+.hero-slider__btn--next { right: var(--space-4); }
+
+/* Kropki */
+.hero-slider__dots {
+  position: absolute;
+  bottom: var(--space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-2);
+  z-index: 10;
+}
+
+.hero-slider__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(241, 242, 237, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--dur-mid), transform var(--dur-mid);
+}
+
+.hero-slider__dot.is-active {
+  background: var(--color-light);
+  transform: scale(1.35);
+}
+
+/* Ukryj strzalki gdy tylko 1 zdjecie */
+.hero-slider--single .hero-slider__btn,
+.hero-slider--single .hero-slider__dots {
+  display: none;
+}
+
+/* ================================================
    SKELETON LOADER (portfolio.html)
    ================================================ */
 

@@ -89,18 +89,14 @@
     </a>
   </div>
 
-  <!-- HERO COVER — src i alt uzupelniane przez gallery.js -->
+  <!-- HERO SLIDER — budowany dynamicznie przez gallery.js -->
   <div class="project-hero">
-    <img
-      id="project-hero-img"
-      src=""
-      alt=""
-      class="project-hero__img"
-      width="1600"
-      height="900"
-      fetchpriority="high"
-      decoding="async"
-    />
+    <div class="hero-slider" id="hero-slider">
+      <div class="hero-slider__track" id="hero-slider-track"></div>
+      <button class="hero-slider__btn hero-slider__btn--prev" id="hero-slider-prev" aria-label="Poprzednie zdjecie">&#8249;</button>
+      <button class="hero-slider__btn hero-slider__btn--next" id="hero-slider-next" aria-label="Nastepne zdjecie">&#8250;</button>
+      <div class="hero-slider__dots" id="hero-slider-dots"></div>
+    </div>
   </div>
 
   <!-- BREADCRUMB — nawigacja okruszkowa (SEO) -->

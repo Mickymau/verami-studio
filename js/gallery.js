@@ -33,8 +33,12 @@
   /* ------------------------------------------------
      REFERENCJE DO DOM
      ------------------------------------------------ */
-  const heroImg      = document.getElementById('project-hero-img');
-  const titleEl      = document.getElementById('project-title');
+  const sliderEl    = document.getElementById('hero-slider');
+  const sliderTrack = document.getElementById('hero-slider-track');
+  const sliderPrev  = document.getElementById('hero-slider-prev');
+  const sliderNext  = document.getElementById('hero-slider-next');
+  const sliderDots  = document.getElementById('hero-slider-dots');
+  const titleEl     = document.getElementById('project-title');
   const categoryEl   = document.getElementById('project-category');
   const locationEl   = document.getElementById('project-location');
   const areaEl       = document.getElementById('project-area');
@@ -121,13 +125,7 @@
         metaDesc.setAttribute('content', (meta.description || '').slice(0, 155));
       }
 
-      /* 3. Hero cover */
-      if (heroImg) {
-        const coverSrc = await findCover(folder);
-        loadImg(heroImg, coverSrc, meta.title);
-      }
-
-      /* 4. Pola tekstowe */
+      /* 3. Pola tekstowe */
       setText(titleEl,      meta.title);
       setText(categoryEl,   meta.category);
       setText(locationEl,   meta.location);
@@ -135,10 +133,13 @@
       setText(descEl,       meta.description);
       setText(breadcrumbEl, meta.title);
 
-      /* 5. Galeria */
+      /* 4. Odkryj zdjecia i zbuduj slider + galerie */
       const coverSrc = await findCover(folder);
-      const images = await discoverImages(folder);
-      renderGallery([coverSrc, ...images]);
+      const images   = await discoverImages(folder);
+      const allImages = [coverSrc, ...images];
+
+      buildSlider(allImages, meta.title);
+      renderGallery(allImages);
 
     } catch (err) {
       console.error('[gallery.js]', err);
@@ -149,6 +150,68 @@
 
   function setText(el, val) {
     if (el) el.textContent = val || '';
+  }
+
+  /* ------------------------------------------------
+     HERO SLIDER
+     ------------------------------------------------ */
+  function buildSlider(images, title) {
+    if (!sliderEl || !sliderTrack) return;
+
+    /* Slajdy */
+    sliderTrack.innerHTML = images.map((src, i) => `
+      <div class="hero-slider__slide">
+        <img
+          src="${src}"
+          alt="${title || ''} — zdjęcie ${i + 1}"
+          ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
+          decoding="async"
+          width="1600" height="900"
+        />
+      </div>
+    `).join('');
+
+    /* Kropki */
+    if (sliderDots) {
+      sliderDots.innerHTML = images.map((_, i) => `
+        <button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdjęcie ${i + 1}"></button>
+      `).join('');
+    }
+
+    /* Ukryj kontrolki gdy 1 zdjecie */
+    if (images.length <= 1) {
+      sliderEl.classList.add('hero-slider--single');
+    }
+
+    let current = 0;
+    const total = images.length;
+    const dots  = sliderDots ? Array.from(sliderDots.querySelectorAll('.hero-slider__dot')) : [];
+
+    function goTo(index) {
+      current = ((index % total) + total) % total;
+      sliderTrack.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+    }
+
+    sliderPrev?.addEventListener('click', () => goTo(current - 1));
+    sliderNext?.addEventListener('click', () => goTo(current + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+    /* Swipe touch */
+    let touchStartX = 0;
+    sliderEl.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    sliderEl.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) goTo(dx < 0 ? current + 1 : current - 1);
+    }, { passive: true });
+
+    /* Klawiatura (gdy slider w focusie) */
+    sliderEl.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  goTo(current - 1);
+      if (e.key === 'ArrowRight') goTo(current + 1);
+    });
   }
 
   /* ------------------------------------------------
