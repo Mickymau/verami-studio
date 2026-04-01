@@ -16,15 +16,22 @@
   const nav = document.querySelector('.nav');
   if (!nav) return;
 
-  /* Jesli nav ma juz is-scrolled w HTML (podstrony) — nie ruszamy klasy */
-  if (nav.classList.contains('is-scrolled')) return;
+  const page = location.pathname.split('/').pop() || 'index.html';
+  const isHome = (page === '' || page === 'index.html');
 
+  /* Na podstronach belka zawsze is-scrolled — ciemna, bez transparentnosci */
+  if (!isHome) {
+    nav.classList.add('is-scrolled');
+    return;
+  }
+
+  /* Na stronie glownej — is-scrolled dopiero po 40px scrolla */
   function update() {
     nav.classList.toggle('is-scrolled', window.scrollY > 40);
   }
 
   window.addEventListener('scroll', update, { passive: true });
-  update(); /* Stan przy zaladowaniu (np. odswiezenie w polowie strony) */
+  update();
 })();
 
 
