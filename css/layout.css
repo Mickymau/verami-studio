@@ -237,6 +237,19 @@
   transform: rotate(-42deg);
 }
 
+/* Menu otwarte na hero — X i logo zawsze ciemne (biale menu w tle) */
+.nav__hamburger.is-open span {
+  background: var(--color-dark);
+}
+
+.nav:has(.nav__hamburger.is-open) .nav__logo-name {
+  color: var(--color-dark);
+}
+
+.nav:has(.nav__hamburger.is-open) .nav__logo-tagline {
+  color: var(--color-dark-40);
+}
+
 /* Menu mobilne */
 .nav__mobile {
   position: fixed;
