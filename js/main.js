@@ -37,7 +37,8 @@
 (function initMobileMenu() {
   const hamburger  = document.querySelector('.nav__hamburger');
   const mobileMenu = document.querySelector('.nav__mobile');
-  if (!hamburger || !mobileMenu) return;
+  const nav        = document.querySelector('.nav');
+  if (!hamburger || !mobileMenu || !nav) return;
 
   function open() {
     hamburger.classList.add('is-open');
