@@ -556,6 +556,20 @@
   transform: scale(1.35);
 }
 
+/* Kontrolki — domyslnie ukryte, pokazuja sie przy interakcji */
+.hero-slider__btn,
+.hero-slider__dots {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.hero-slider.controls-visible .hero-slider__btn,
+.hero-slider.controls-visible .hero-slider__dots {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Ukryj strzalki gdy tylko 1 zdjecie */
 .hero-slider--single .hero-slider__btn,
 .hero-slider--single .hero-slider__dots {

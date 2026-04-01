@@ -256,6 +256,32 @@
       if (e.key === 'ArrowLeft')  sliderGo(-1);
       if (e.key === 'ArrowRight') sliderGo(+1);
     });
+
+    /* ---- Auto-hide kontrolek ---- */
+    let hideTimer = null;
+
+    function showControls() {
+      sliderEl.classList.add('controls-visible');
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => sliderEl.classList.remove('controls-visible'), 3000);
+    }
+
+    function hideControls() {
+      clearTimeout(hideTimer);
+      sliderEl.classList.remove('controls-visible');
+    }
+
+    /* Pokaz przy wejsciu na strone */
+    showControls();
+
+    /* Reset timera przy kazdej interakcji */
+    sliderEl.addEventListener('touchstart', showControls, { passive: true });
+    sliderPrev?.addEventListener('mouseenter', showControls);
+    sliderNext?.addEventListener('mouseenter', showControls);
+
+    /* Desktop: pokaz przy najechaniu mysza, ukryj po zjechaniu */
+    sliderEl.addEventListener('mouseenter', showControls);
+    sliderEl.addEventListener('mouseleave', hideControls);
   }
 
   /* ------------------------------------------------
