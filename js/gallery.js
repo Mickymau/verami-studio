@@ -61,39 +61,50 @@
     });
   }
 
-  /* Znajdz cover: webp > jpg > png */
+  /* Znajdz cover: webp > jpg > png.
+     Zwraca cover.webp od razu (bez probe) — przeglądarka sama obsłuży błąd.
+     Probe tylko gdy webp nie istnieje. */
   async function findCover(f) {
-    const candidates = [
-      `portfolio/${f}/cover.webp`,
-      `portfolio/${f}/cover.jpg`,
-      `portfolio/${f}/cover.png`,
-    ];
-    for (const src of candidates) {
-      if (await probeImage(src)) return src;
-    }
-    return candidates[candidates.length - 1]; /* fallback */
+    const preferred = `portfolio/${f}/cover.webp`;
+    if (await probeImage(preferred)) return preferred;
+    const jpg = `portfolio/${f}/cover.jpg`;
+    if (await probeImage(jpg)) return jpg;
+    return `portfolio/${f}/cover.png`;
   }
 
-  /* Autodetekcja zdjec galerii:
-     Sprawdza 01.webp > 01.jpg > 01.png az do pierwszego braku. */
+  /* Autodetekcja zdjec galerii rownolegla:
+     Sprawdza kilka numerow naraz, przerywa przy pierwszej luce. */
   async function discoverImages(f) {
     const found = [];
+    const BATCH = 5; /* ile numerow sprawdzamy jednoczesnie */
 
-    for (let i = 1; i <= 40; i++) {
-      const pad  = String(i).padStart(2, '0');
-      const exts = ['webp', 'jpg', 'png'];
-      let found_this = false;
-
-      for (const ext of exts) {
-        const url = `portfolio/${f}/${pad}.${ext}`;
-        if (await probeImage(url)) {
-          found.push(url);
-          found_this = true;
-          break;
-        }
+    for (let i = 1; i <= 40; i += BATCH) {
+      /* Przygotuj batch kandydatow */
+      const batch = [];
+      for (let j = i; j < i + BATCH && j <= 40; j++) {
+        const pad  = String(j).padStart(2, '0');
+        const exts = ['webp', 'jpg', 'png'];
+        batch.push({ num: j, pad, exts });
       }
 
-      if (!found_this) break; /* Przerwij przy pierwszej luce */
+      /* Sprawdz wszystkie w batchu rownolegla */
+      const results = await Promise.all(
+        batch.map(async ({ pad, exts }) => {
+          for (const ext of exts) {
+            const url = `portfolio/${f}/${pad}.${ext}`;
+            if (await probeImage(url)) return url;
+          }
+          return null;
+        })
+      );
+
+      /* Dodaj wyniki az do pierwszej luki */
+      let gap = false;
+      for (const url of results) {
+        if (!url) { gap = true; break; }
+        found.push(url);
+      }
+      if (gap) break;
     }
 
     return found;
@@ -133,13 +144,16 @@
       setText(descEl,       meta.description);
       setText(breadcrumbEl, meta.title);
 
-      /* 4. Odkryj zdjecia i zbuduj slider + galerie */
+      /* 4. Cover — od razu, bez czekania na galerię */
       const coverSrc = await findCover(folder);
-      const images   = await discoverImages(folder);
-      const allImages = [coverSrc, ...images];
+      buildSlider([coverSrc], meta.title); /* slider z 1 zdjęciem — natychmiast */
 
-      buildSlider(allImages, meta.title);
-      renderGallery(allImages);
+      /* 5. Galeria — równolegle z coverem, dobudowuje slider po załadowaniu */
+      const images = await discoverImages(folder);
+      if (images.length > 0) {
+        expandSlider([coverSrc, ...images], meta.title);
+      }
+      renderGallery([coverSrc, ...images]);
 
     } catch (err) {
       console.error('[gallery.js]', err);
@@ -155,6 +169,33 @@
   /* ------------------------------------------------
      HERO SLIDER
      ------------------------------------------------ */
+
+  /* Rozbuduj slider o nowe zdjęcia gdy galeria się załaduje */
+  function expandSlider(images, title) {
+    if (!sliderEl || !sliderTrack) return;
+
+    sliderTrack.innerHTML = images.map((src, i) => `
+      <div class="hero-slider__slide">
+        <img
+          src="${src}"
+          alt="${title || ''} — zdjęcie ${i + 1}"
+          ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
+          decoding="async"
+          width="1600" height="900"
+        />
+      </div>
+    `).join('');
+
+    if (sliderDots) {
+      sliderDots.innerHTML = images.map((_, i) => `
+        <button class="hero-slider__dot${i === 0 ? ' is-active' : ''}" aria-label="Zdjęcie ${i + 1}"></button>
+      `).join('');
+    }
+
+    sliderEl.classList.remove('hero-slider--single');
+    _initSliderLogic(images);
+  }
+
   function buildSlider(images, title) {
     if (!sliderEl || !sliderTrack) return;
 
@@ -183,35 +224,52 @@
       sliderEl.classList.add('hero-slider--single');
     }
 
+    _initSliderLogic(images);
+  }
+
+  /* Logika nawigacji slidera — wywoływana tez przez expandSlider */
+  let _sliderListenersAttached = false;
+  let _goTo = null;
+
+  function _initSliderLogic(images) {
     let current = 0;
     const total = images.length;
-    const dots  = sliderDots ? Array.from(sliderDots.querySelectorAll('.hero-slider__dot')) : [];
 
-    function goTo(index) {
+    _goTo = function(index) {
       current = ((index % total) + total) % total;
       sliderTrack.style.transform = `translateX(-${current * 100}%)`;
+      const dots = sliderDots ? Array.from(sliderDots.querySelectorAll('.hero-slider__dot')) : [];
       dots.forEach((d, i) => d.classList.toggle('is-active', i === current));
+    };
+
+    /* Odswiezenie kropek po expandSlider */
+    if (sliderDots) {
+      sliderDots.querySelectorAll('.hero-slider__dot').forEach((dot, i) => {
+        dot.onclick = () => _goTo(i);
+      });
     }
 
-    sliderPrev?.addEventListener('click', () => goTo(current - 1));
-    sliderNext?.addEventListener('click', () => goTo(current + 1));
-    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+    /* Strzalki i swipe — dodaj tylko raz */
+    if (!_sliderListenersAttached) {
+      sliderPrev?.addEventListener('click', () => _goTo && _goTo(current - 1));
+      sliderNext?.addEventListener('click', () => _goTo && _goTo(current + 1));
 
-    /* Swipe touch */
-    let touchStartX = 0;
-    sliderEl.addEventListener('touchstart', e => {
-      touchStartX = e.changedTouches[0].clientX;
-    }, { passive: true });
-    sliderEl.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(dx) > 50) goTo(dx < 0 ? current + 1 : current - 1);
-    }, { passive: true });
+      let touchStartX = 0;
+      sliderEl.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].clientX;
+      }, { passive: true });
+      sliderEl.addEventListener('touchend', e => {
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        if (Math.abs(dx) > 50) _goTo && _goTo(dx < 0 ? current + 1 : current - 1);
+      }, { passive: true });
 
-    /* Klawiatura (gdy slider w focusie) */
-    sliderEl.addEventListener('keydown', e => {
-      if (e.key === 'ArrowLeft')  goTo(current - 1);
-      if (e.key === 'ArrowRight') goTo(current + 1);
-    });
+      sliderEl.addEventListener('keydown', e => {
+        if (e.key === 'ArrowLeft')  _goTo && _goTo(current - 1);
+        if (e.key === 'ArrowRight') _goTo && _goTo(current + 1);
+      });
+
+      _sliderListenersAttached = true;
+    }
   }
 
   /* ------------------------------------------------
