@@ -157,3 +157,23 @@
     heroBg.complete ? done() : heroBg.addEventListener('load', done, { once: true });
   }
 })();
+
+
+/* ------------------------------------------------
+   GA4 — SLEDZENIE KLIKNIEC TEL/MAILTO
+   Wysyla zdarzenie do GA4 przy kliknieciu w numer
+   telefonu lub adres e-mail (np. w stopce, navie).
+   ------------------------------------------------ */
+(function initContactClickTracking() {
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a[href^="tel:"], a[href^="mailto:"]');
+    if (!link) return;
+    if (typeof gtag !== 'function') return;
+
+    const isPhone = link.getAttribute('href').startsWith('tel:');
+    gtag('event', isPhone ? 'phone_call_click' : 'email_click', {
+      link_url:  link.getAttribute('href'),
+      page_path: location.pathname,
+    });
+  });
+})();

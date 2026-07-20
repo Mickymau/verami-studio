@@ -168,10 +168,16 @@
         await sendViaFormspree(name, email, message);
         form.reset();
         showStatus('success', 'Wiadomość wysłana! Odezwę się wkrótce — zwykle w ciągu 24h.');
+        if (typeof gtag === 'function') {
+          gtag('event', 'generate_lead', { method: 'formspree' });
+        }
       } else {
         /* Brak Formspree ID — fallback na mailto */
         sendViaMailto(name, email, message);
         showStatus('success', 'Otwieram klienta pocztowego z gotową wiadomością…');
+        if (typeof gtag === 'function') {
+          gtag('event', 'generate_lead', { method: 'mailto_direct' });
+        }
       }
     } catch (err) {
       console.error('[form.js]', err);
@@ -179,6 +185,9 @@
       try {
         sendViaMailto(name, email, message);
         showStatus('success', 'Otwieram klienta pocztowego (plan B)…');
+        if (typeof gtag === 'function') {
+          gtag('event', 'generate_lead', { method: 'mailto_fallback' });
+        }
       } catch {
         showStatus('error', 'Wystąpił błąd. Napisz bezpośrednio na: ' + CONTACT_EMAIL);
       }
