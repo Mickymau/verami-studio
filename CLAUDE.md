@@ -41,3 +41,15 @@ Nie zmieniać kolejności bez powodu.
 | Pułapki, styl, kolory | `knowledge/PATTERNS.md` |
 | Copywriting, Schema.org, lista projektów | `knowledge/Content-Guide.md` |
 | Co zrobione, co do zrobienia | `knowledge/OPEN-ITEMS.md` |
+
+---
+
+## Wiedza ogólna (BRAIN)
+
+Dobre praktyki spoza tego repo: `C:/Users/Admin/Desktop/PROJEKTY/ObsidianVault/moj_system/BRAIN/`
+- strony (struktura, teksty, design, SEO, testy): `wiedza/strony/_indeks.md`
+- marketing: `wiedza/marketing/_indeks.md`
+- praca z AI: `wiedza/ai/_indeks.md`
+- audyt strony: `playbooki/audyt-strony.md`
+
+Czytaj indeks, potem jedną kartę — tylko gdy zadanie tego wymaga. Lekcję przydatną poza projektem zaproponuj do dopisania w BRAIN.
